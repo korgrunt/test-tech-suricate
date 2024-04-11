@@ -1,0 +1,85 @@
+version: '3'
+
+services:
+  db-prestashop:
+    image: mysql:5.7
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=prestashop
+      - MYSQL_USER=prestashop
+      - MYSQL_PASSWORD=prestashop123
+    ports:
+      - "3306:3306/tcp"
+    volumes:
+      - "./volume-db-data-pretashop:/var/lib/mysql"
+    networks:
+      - suricate_network
+
+  prestashop:
+    image: prestashop/prestashop:1.7
+    environment:
+      - DB_SERVER=db-prestashop
+      - DB_NAME=prestashop
+      - DB_USER=prestashop
+      - DB_PASSWD=prestashop123
+      - DB_PREFIX=ps_
+    ports:
+      - "8080:80/tcp"
+    networks:
+      - suricate_network
+
+  db-odoo:
+    image: postgres:16
+    user: root
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo17@2023
+      - POSTGRES_DB=postgres
+    restart: always             # run as a service
+    volumes:
+        - ./volume-db-data-odoo:/var/lib/postgresql/data
+    networks:
+      - suricate_network
+      
+  odoo:
+    image: odoo:17
+    user: root
+    depends_on:
+      - db-odoo
+    ports:
+      - "10017:8069"
+      - "20017:8072" # live chat
+    tty: true
+    command: --
+    environment:
+      - HOST=db-odoo
+      - USER=odoo
+      - PASSWORD=odoo17@2023
+    volumes:
+      #- /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
+      # - ./entrypoint.sh:/entrypoint.sh   # if you want to install additional Python packages, uncomment this line!
+      - ./volume-addons-odoo:/mnt/extra-addons
+      - ./volume-etc-odoo:/etc/odoo
+    restart: always             # run as a service
+    networks:
+      - suricate_network
+  
+  flask_app:
+    image: python:3.9-slim
+    container_name: flask_app
+    entrypoint: >
+      /bin/bash -c "
+      source ./app/venv/bin/activate &&
+      pip install -r /app/requirements.txt &&
+      cd app &&
+      flask run --reload" 
+    volumes:
+      - ./flask_app:/app
+    ports:
+      - "5000:5000"
+    networks:
+      - suricate_network
+
+networks:
+  suricate_network:
