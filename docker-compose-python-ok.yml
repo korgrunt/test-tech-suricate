@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  flask_app:
+    image: python:3.9-slim
+    container_name: flask_app
+    entrypoint: >
+      /bin/bash -c "
+      source ./app/venv/bin/activate &&
+      pip install -r /app/requirements.txt &&
+      python ./app/app.py"
+    volumes:
+      - ./flask_app:/app
+    ports:
+      - "5000:5000"
+    networks:
+      - my_network
+      
+networks:
+  my_network:

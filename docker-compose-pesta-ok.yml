@@ -1,0 +1,35 @@
+version: '3'
+
+volumes:
+    db-data:
+
+services:
+  app:
+    image: prestashop/prestashop:1.7
+    environment:
+      - DB_SERVER=db
+      - DB_NAME=prestashop
+      - DB_USER=prestashop
+      - DB_PASSWD=prestashop123
+      - DB_PREFIX=ps_
+    ports:
+      - "8080:80/tcp"
+    networks:
+      - my_network
+
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=prestashop
+      - MYSQL_USER=prestashop
+      - MYSQL_PASSWORD=prestashop123
+    ports:
+      - "3306:3306/tcp"
+    volumes:
+      - "db-data:/var/lib/mysql"
+    networks:
+      - my_network
+
+networks:
+  my_network:
