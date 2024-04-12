@@ -16,7 +16,7 @@ services:
       - suricate_network
 
   prestashop:
-    image: prestashop/prestashop:1.7
+    image: prestashop/prestashop:8.0
     environment:
       - DB_SERVER=db-prestashop
       - DB_NAME=prestashop
