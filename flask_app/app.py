@@ -1,10 +1,8 @@
 from flask import Flask
+from controllers.main_controller import main_controller
 
 app = Flask(__name__)
-
-@app.route('/helloworld', methods=['GET'])
-def hello_world():
-    return 'Hello, World!'
+app.register_blueprint(main_controller)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
