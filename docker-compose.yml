@@ -64,21 +64,6 @@ services:
     restart: always             # run as a service
     networks:
       - suricate_network
-  
-  flask_app:
-    image: python:3.9-slim
-    container_name: flask_app
-    entrypoint: >
-      /bin/bash -c "
-      source ./app/venv/bin/activate &&
-      pip install -r /app/requirements.txt &&
-      python ./app/app.py"
-    volumes:
-      - ./flask_app:/app
-    ports:
-      - "5000:5000"
-    networks:
-      - suricate_network
 
 networks:
   suricate_network:
