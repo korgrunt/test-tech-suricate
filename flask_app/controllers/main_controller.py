@@ -38,6 +38,6 @@ def post_product():
     if(products_target  == "odoo"):
         return service.create_odoo_products(body['name'], body['price'], body['description'])
     if(products_target  == "prestashop"):
-        return service.get_prestashop_products()
+        return service.create_prestashop_products(body['name'], body['price'], body['description'])
     return "Unknown source", 400
 
