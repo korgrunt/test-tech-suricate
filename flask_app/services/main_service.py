@@ -7,7 +7,7 @@ class ProductService:
         self.prestashopClient = PrestaShopClient()
         
     def get_prestashop_products(self):
-        return ['presta_User1', 'presta_User2', 'presta_User3']
+        return self.prestashopClient.get_products()
     
     def get_odoo_products(self):
         return self.odooClient.get_products()
