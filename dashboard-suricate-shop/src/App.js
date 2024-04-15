@@ -15,11 +15,23 @@ const fetchProducts = (source) => {
   }
 }
 
+function sortArray(tab){
+  return tab.sort((a, b) => {
+    let nameA = a.name.toLowerCase(); // Convertir en minuscules pour ignorer la casse
+    let nameB = b.name.toLowerCase();
+    if (nameA < nameB) {
+        return -1; // a doit venir avant b dans l'ordre
+    }
+    if (nameA > nameB) {
+        return 1; // b doit venir avant a dans l'ordre
+    }
+    return 0; // a et b sont égaux
+});
+}
 function App() {
 
   const [productsOdoo, setProductsOdoo] = useState([]);
   const [productsPretashop, setProductsPretashop] = useState([]);
-
   
 
 
@@ -31,16 +43,16 @@ function App() {
       price: product.list_price, 
       description: product.description
     }
-    axios.post(`http://localhost:5000/products?target=${source == "prestashop" ? "odoo" : "prestashop"}`, productCopy)
+    axios.post(`http://localhost:5000/products?target=${source === "prestashop" ? "odoo" : "prestashop"}`, productCopy)
       .then(response => {
         // Gérer la réponse de l'appel HTTP ici
         console.log("success");
         console.log(response.data);
-        if(source == "odoo"){
-          //fetchProducts("prestashop");
+        if(source === "odoo"){
+          fetchProducts("prestashop").then(products => { setProductsPretashop(products.data);});
         }
-        if(source == "prestashop"){
-          //fetchProducts("odoo"); 
+        if(source === "prestashop"){
+          fetchProducts("odoo").then(products => { setProductsOdoo(products.data);});
         }
       })
       .catch(error => {
@@ -50,61 +62,63 @@ function App() {
   };
 
   useEffect(() => {
-
-    fetchProducts("odoo").then(products => {
-      console.log(products)
-      setProductsOdoo(products);
-    });
-    fetchProducts("prestashop").then(products => {
-      console.log(products)
-      setProductsPretashop(products);
-    });
+    try {
+      fetchProducts("odoo").then(products => { setProductsOdoo(products.data);});
+      fetchProducts("prestashop").then(products => { setProductsPretashop(products.data);});
+        
+    } catch (error) {
+      console.log(error)
+    }
+    return  () => {
+      console.log("will unmount")
+    }
 
   }, []);
 
   return (
     <div className="App">
-      <header className="App-header">
+      <div  style={{ height: "50vh", width: "100vw", backgroundColor: "grey"}}>
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload. all
+          Simple dahboard odoo prestashop - suricate shop
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        
+      </div>
 
-      <div>
-      <div style={{ display: 'inline-block', marginRight: '20px' }}>
-        <h2>Odoo</h2>
-        <div >
-          <p>count {productsOdoo.length}</p>
-          {
-            productsOdoo.length > 0 && productsOdoo.map(product => {
-              return <><span>{product.name}</span>-<span>{product.list_price} euro</span><button onClick={() => copyProduct("odoo", product)}>Copy to presta</button><br></br></>
-            })
-          }
-        </div>
-      </div>
-      <div style={{ display: 'inline-block' }}>
-        <h2>Prestashop</h2>
-        <div >
-          <p>count {productsPretashop.length}</p>
-          {
-            productsPretashop.length > 0 && productsPretashop.map(product => {
-            return <><span>{product.name}</span>-<span>{product.list_price} euro</span><button onClick={() => copyProduct("prestashop", product)}>Copy to odoo</button><br></br></>
-          })
-          }
-        </div>
-      </div>
-    </div>
+     
+
+        <div>
+
+          <div style={{ display: 'inline-block', marginRight: '20px' }}>
+            <h2>Odoo</h2>
+            <div >
+              <p>count {productsOdoo.length}</p>
+              {
+                productsOdoo.length > 0 && sortArray(productsOdoo).map(product => {
+                  return <><span>{product.name}</span>-<span>{product.list_price} euro</span><button onClick={() => copyProduct("odoo", product)}>Copy to presta</button><br></br></>
+                })
+              }
+            </div>
+          </div>
+          <div style={{ display: 'inline-block' }}>
+            <h2>Prestashop</h2>
+            <div >
+              <p>count {productsPretashop.length}</p>
+              {
+                productsPretashop.length > 0 && sortArray(productsPretashop).map(product => {
+                return <><span>{product.name}</span>-<span>{product.list_price} euro</span><button onClick={() => copyProduct("prestashop", product)}>Copy to odoo</button><br></br></>
+              })
+              }
+            </div>
+          </div>
+
+       
       
-    </div>
+          </div>
+          <br></br>
+          <br></br>
+          <br></br>
+          </div>
   );
 }
 
